@@ -1,0 +1,20 @@
+{
+  "name": "data-worker",
+  "version": "0.0.1",
+  "description": "application for working with data from TMDb and putting it to database",
+  "main": "index.js",
+  "repository": "https://github.com/IlonaMenkui/data-worker",
+  "author": "IlonaMenkui <ilonaspolding@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "dependencies": {
+    "dotenv": "^8.2.0"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "nodemon": "^2.0.2"
+  }
+}
