@@ -3,28 +3,23 @@ const axios = require('axios');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-const TMDB_URL = `https://api.themoviedb.org/3/discover/movie`;
+const axiosInstance = axios.create({
+  baseURL: process.env.TMDB_BASE_URL,
+});
 
-const getMovies = async ({ page, url }) => {
-  const { data: { results, total_pages } } = await axios.get(
-    url,
-    {
-      params: {
-        api_key: process.env.TMDB_API_KEY,
-        page,
-      },
+axiosInstance.interceptors.response.use(response => {
+  return response.data;
+}, error => {
+  return Promise.reject(error);
+});
+
+const getMovies = (page) => {
+  return axiosInstance.get('/discover/movie', {
+    params: {
+      api_key: process.env.TMDB_API_KEY,
+      page,
     },
-  );
-  const movies = results.map(
-    ({
-      title, genre_ids, vote_average, overview, poster_path, release_date,
-      popularity, original_language, vote_count, original_title,
-    }) => ({
-      title, genre_ids, vote_average, overview, poster_path, release_date,
-      popularity, original_language, vote_count, original_title,
-    }),
-  );
-  return { movies, total_pages };
+  });
 };
 
 const { Schema } = mongoose;
@@ -50,11 +45,7 @@ const movieScheme = new Schema({
 
 const Movie = mongoose.model('Movie', movieScheme);
 
-const firstMovie = new Movie({
-  title: 'Fight Club',
-});
-
-mongoose.connect(process.env.DB_URI, { useNewUrlParser: true });
+mongoose.connect(process.env.DB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
 const db = mongoose.connection;
 
@@ -63,12 +54,20 @@ db.on('error', (err) => {
 });
 
 db.once('open', async () => {
-  const allMovies = [];
-  const { movies, total_pages } = await getMovies({ url: TMDB_URL, page: 1 });
-  movies.map(movie => allMovies.push(movie));
-  for (let i = 2; i <= total_pages; i++) {
-    const { movies } = await getMovies({ url: TMDB_URL, page: total_pages });
-    movies.map(movie => allMovies.push(movie));
+  try {
+    let allMovies = [];
+    const { results, total_pages } = await getMovies(1);
+    allMovies = [...allMovies, ...results];
+    for (let i = 2; i <= total_pages; i++) {
+      const { results } = await getMovies(i);
+      allMovies = [...allMovies, ...results];
+    }
+    Movie.create(allMovies, (e, r) => {
+      if (e) console.error(e)
+      console.log('Successfully saved!');
+    });
+  } catch (error) {
+    console.error(error)
   }
 });
 
