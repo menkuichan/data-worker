@@ -10,6 +10,7 @@
     "start": "nodemon index.js"
   },
   "dependencies": {
+    "axios": "^0.19.1",
     "dotenv": "^8.2.0",
     "mongoose": "^5.8.6"
   },
