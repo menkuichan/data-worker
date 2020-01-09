@@ -2,40 +2,29 @@ const http = require('http');
 const axios = require('axios');
 const mongoose = require('mongoose');
 require('dotenv').config();
-const { MAX_TOTAL_PAGES, TMDB_PARAMS: { URL, SEARCH_URL }, URL_TYPES } = require('./constants');
 
-const getMovies = async ({ query, page, url }) => {
-  const fullUrl = query ? SEARCH_URL : `${URL}${url}`;
-  const { data: { results, total_pages: originalTotalPages } } = await axios.get(
-    fullUrl,
+const TMDB_URL = `https://api.themoviedb.org/3/discover/movie`;
+
+const getMovies = async ({ page, url }) => {
+  const { data: { results, total_pages } } = await axios.get(
+    url,
     {
       params: {
         api_key: process.env.TMDB_API_KEY,
-        query,
         page,
       },
     },
   );
-  const totalPages = Math.min(originalTotalPages, MAX_TOTAL_PAGES);
   const movies = results.map(
     ({
-      title, genre_ids: genresIds, vote_average: voteAverage, overview, poster_path: posterPath,
-      release_date: releaseDate, popularity,
-      original_language: originalLanguage, vote_count: voteCount, original_title: originalTitle,
+      title, genre_ids, vote_average, overview, poster_path, release_date,
+      popularity, original_language, vote_count, original_title,
     }) => ({
-      title,
-      genresIds,
-      voteAverage,
-      overview,
-      popularity,
-      originalLanguage,
-      voteCount,
-      originalTitle,
-      releaseDate,
-      posterPath,
+      title, genre_ids, vote_average, overview, poster_path, release_date,
+      popularity, original_language, vote_count, original_title,
     }),
   );
-  return { movies, totalPages };
+  return { movies, total_pages };
 };
 
 const { Schema } = mongoose;
@@ -73,11 +62,14 @@ db.on('error', (err) => {
   console.error(err);
 });
 
-
-db.once('open', () => {
-  firstMovie.save(() => {
-    console.log(firstMovie.title);
-  });
+db.once('open', async () => {
+  const allMovies = [];
+  const { movies, total_pages } = await getMovies({ url: TMDB_URL, page: 1 });
+  movies.map(movie => allMovies.push(movie));
+  for (let i = 2; i <= total_pages; i++) {
+    const { movies } = await getMovies({ url: TMDB_URL, page: total_pages });
+    movies.map(movie => allMovies.push(movie));
+  }
 });
 
 const server = http.createServer((req, res) => {
@@ -87,9 +79,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(process.env.APP_PORT, () => {
-  URL_TYPES.map(async (type) => {
-    const res = await getMovies({ url: type, page: 1 });
-    console.log(res);
-  });
   console.log(`Server running at port: ${process.env.APP_PORT}`);
 });
