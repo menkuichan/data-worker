@@ -43,7 +43,7 @@ const server = http.createServer((req, res) => {
   res.end('Hello World\n');
 });
 
-server.listen(process.env.APP_PORT, async () => {
+server.listen(process.env.APP_PORT, () => {
   URL_TYPES.map(async (type) => {
     const res = await getMovies({ url: type, page: 1 });
     console.log(res);
