@@ -4,8 +4,6 @@ const mongoose = require('mongoose');
 var CronJob = require('cron').CronJob;
 require('dotenv').config();
 
-new CronJob('0 0 12 * * * *', () => putAllMoviePagesInDatabase(), null, true, 'America/Los_Angeles');
-
 const axiosInstance = axios.create({
   baseURL: process.env.TMDB_BASE_URL,
 });
@@ -75,6 +73,7 @@ db.on('error', (err) => {
 });
 
 db.once('open', () => {
+  new CronJob('0 0 12 * * * *', () => putAllMoviePagesInDatabase(), null, true, 'America/Los_Angeles');
   putAllMoviePagesInDatabase();
 });
 
