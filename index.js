@@ -1,7 +1,10 @@
 const http = require('http');
 const axios = require('axios');
 const mongoose = require('mongoose');
+var CronJob = require('cron').CronJob;
 require('dotenv').config();
+
+new CronJob('0 0 12 * * * *', () => putAllMoviePagesInDatabase(), null, true, 'America/Los_Angeles');
 
 const axiosInstance = axios.create({
   baseURL: process.env.TMDB_BASE_URL,
@@ -45,15 +48,7 @@ const movieScheme = new Schema({
 
 const Movie = mongoose.model('Movie', movieScheme);
 
-mongoose.connect(process.env.DB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
-
-const db = mongoose.connection;
-
-db.on('error', (err) => {
-  console.error(err);
-});
-
-db.once('open', async () => {
+const putAllMoviePagesInDatabase = async () => {
   try {
     let allMovies = [];
     const { results, total_pages } = await getMovies(1);
@@ -69,6 +64,18 @@ db.once('open', async () => {
   } catch (error) {
     console.error(error)
   }
+}
+
+mongoose.connect(process.env.DB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+
+const db = mongoose.connection;
+
+db.on('error', (err) => {
+  console.error(err);
+});
+
+db.once('open', () => {
+  putAllMoviePagesInDatabase();
 });
 
 const server = http.createServer((req, res) => {
