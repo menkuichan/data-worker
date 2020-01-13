@@ -6,5 +6,6 @@ module.exports = {
     'airbnb-base',
   ],
   rules: {
+    'no-console': 0,
   },
 };
