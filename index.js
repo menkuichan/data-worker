@@ -8,20 +8,19 @@ const axiosInstance = axios.create({
   baseURL: process.env.TMDB_BASE_URL,
 });
 
-axiosInstance.interceptors.response.use(response => {
-  return response.data;
-}, error => {
-  return Promise.reject(error);
-});
+axiosInstance.interceptors.response.use(
+  (response) => response.data,
+  (error) => Promise.reject(error),
+);
 
-const getMovies = (page) => {
-  return axiosInstance.get('/discover/movie', {
+const getMovies = (page) => (
+  axiosInstance.get('/discover/movie', {
     params: {
       api_key: process.env.TMDB_API_KEY,
       page,
     },
-  });
-};
+  })
+);
 
 const { Schema } = mongoose;
 
@@ -49,11 +48,11 @@ const Movie = mongoose.model('Movie', movieScheme);
 const populateDB = async () => {
   try {
     let allMovies = [];
-    const { results, total_pages } = await getMovies(1);
+    const { results, total_pages } = await getMovies(1); // eslint-disable-line
     allMovies = [...allMovies, ...results];
-    for (let i = 2; i <= total_pages; i++) {
-      const { results } = await getMovies(i);
-      allMovies = [...allMovies, ...results];
+    for (let i = 2; i <= total_pages; i++) { // eslint-disable-line
+      const { results: movies } = await getMovies(i);
+      allMovies = [...allMovies, ...movies];
     }
     Movie.create(allMovies, (e) => {
       if (e) console.error(e);
@@ -72,8 +71,10 @@ db.on('error', (err) => {
   console.error(err);
 });
 
+const job = new CronJob('0 0 12 * * * *', () => populateDB(), null, true, 'Europe/Minsk', null, true);
+
 db.once('open', () => {
-  new CronJob('0 0 12 * * * *', () => populateDB(), null, true, 'Europe/Minsk');
+  job.start();
 });
 
 const server = http.createServer();
