@@ -1,7 +1,7 @@
 const http = require('http');
 const axios = require('axios');
 const mongoose = require('mongoose');
-var CronJob = require('cron').CronJob;
+const { CronJob } = require('cron');
 require('dotenv').config();
 
 const axiosInstance = axios.create({
@@ -46,7 +46,7 @@ const movieScheme = new Schema({
 
 const Movie = mongoose.model('Movie', movieScheme);
 
-const putAllMoviePagesInDatabase = async () => {
+const populateDB = async () => {
   try {
     let allMovies = [];
     const { results, total_pages } = await getMovies(1);
@@ -56,11 +56,11 @@ const putAllMoviePagesInDatabase = async () => {
       allMovies = [...allMovies, ...results];
     }
     Movie.create(allMovies, (e, r) => {
-      if (e) console.error(e)
+      if (e) console.error(e);
       console.log('Successfully saved!');
     });
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
 }
 
@@ -73,15 +73,10 @@ db.on('error', (err) => {
 });
 
 db.once('open', () => {
-  new CronJob('0 0 12 * * * *', () => putAllMoviePagesInDatabase(), null, true, 'America/Los_Angeles');
-  putAllMoviePagesInDatabase();
+  new CronJob('0 0 12 * * * *', () => populateDB(), null, true, 'Europe/Minsk');
 });
 
-const server = http.createServer((req, res) => {
-  res.statusCode = 200;
-  res.setHeader('Content-Type', 'text/plain');
-  res.end('Hello World\n');
-});
+const server = http.createServer();
 
 server.listen(process.env.APP_PORT, () => {
   console.log(`Server running at port: ${process.env.APP_PORT}`);
