@@ -47,15 +47,26 @@ const Movie = mongoose.model('Movie', movieScheme);
 
 const populateDB = async () => {
   try {
-    let allMovies = [];
-    const { results, total_pages } = await getMovies(1); // eslint-disable-line
-    allMovies = [...allMovies, ...results];
-    for (let i = 2; i <= total_pages; i++) { // eslint-disable-line
-      const { results: movies } = await getMovies(i);
-      allMovies = [...allMovies, ...movies];
+    let movies = [];
+    const promises = [];
+
+    const data = await getMovies(1); // eslint-disable-line
+    movies = [...movies, ...data.results];
+
+    for (let i = 2; i <= data.total_pages; i++) { // eslint-disable-line
+      promises.push(getMovies(i));
     }
-    Movie.create(allMovies, (e) => {
-      if (e) console.error(e);
+
+    const res = await Promise.all(promises);
+
+    const flattenMovies = res
+      .map(({ results }) => results)
+      .reduce((a, b) => a.concat(b), []);
+
+    movies = [...movies, ...flattenMovies];
+
+    Movie.create(movies, (error) => {
+      if (error) console.error(error);
       console.log('Successfully saved!');
     });
   } catch (error) {
@@ -67,8 +78,8 @@ mongoose.connect(process.env.DB_URI, { useNewUrlParser: true, useUnifiedTopology
 
 const db = mongoose.connection;
 
-db.on('error', (err) => {
-  console.error(err);
+db.on('error', (error) => {
+  console.error(error);
 });
 
 const job = new CronJob('0 0 12 * * * *', () => populateDB(), null, true, 'Europe/Minsk', null, true);
