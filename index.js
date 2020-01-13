@@ -55,14 +55,14 @@ const populateDB = async () => {
       const { results } = await getMovies(i);
       allMovies = [...allMovies, ...results];
     }
-    Movie.create(allMovies, (e, r) => {
+    Movie.create(allMovies, (e) => {
       if (e) console.error(e);
       console.log('Successfully saved!');
     });
   } catch (error) {
     console.error(error);
   }
-}
+};
 
 mongoose.connect(process.env.DB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
