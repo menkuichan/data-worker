@@ -22,6 +22,19 @@ docker run --name some-mongo -d mongo:tag
 ```
 ... where ```some-mongo``` is the name you want to assign to your container and ```tag``` is the tag specifying the MongoDB version you want.
 
+### Declare environment variables in .env file
+
+Create and add application configuration to .env file in the root of the project:
+
+```
+APP_PORT=3000
+TMDB_API_KEY=YOURSECRETAPIKEY
+DB_URI=mongodb://localhost:27017/super-enigma-db
+TMDB_BASE_URL=https://api.themoviedb.org/3/
+```
+
+You should to register for an API key, click the [API link](https://www.themoviedb.org/settings/api) from within your account settings page.
+
 ## Installation
 
 Use the package manager Yarn to install all the dependencies of data-worker.
