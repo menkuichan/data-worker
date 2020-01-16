@@ -1,13 +1,11 @@
 FROM node:10
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
-COPY package*.json ./
+COPY . /app
 
 RUN yarn install
 
-COPY . .
+CMD node index.js
 
 EXPOSE 8080
-
-CMD [ "node", "server.js" ]
