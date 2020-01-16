@@ -63,16 +63,16 @@ The app will reload if you make changes to the code.<br>
 
 ## Run Docker container with project and MongoDB
 First, make sure that [MongoDB is running](#run-db).
-Then you need to build a server.
+Then you need to build a docker image.
 ```
 make build-server
 ```
 
 In the end, run the docker container with server.
 ```
-docker run -P --env APP_PORT=app-port --env DB_URI=db-uri --name server-name --link db-name image-uri/module-name
+docker run -P --name server-name --link db-name image-uri
 ```
-... where ```app-port``` is the application port, ```db-uri``` is the database URI, ```server-name``` is the server name and so on.
+... where ```server-name``` is the server name, ```db-name``` is the database name and so on.
 
 ... or run the following command:
 
