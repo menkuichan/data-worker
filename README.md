@@ -14,13 +14,19 @@ Download Node.js not lower than version 8.10, [Yarn](https://yarnpkg.com/) , [Do
 
 Clone this repo to your local machine using `https://github.com/IlonaMenkui/data-worker.git`
 
-### Running database
+### Run database
+<a name="run-db"></a>
 
 Run your docker image with MongoDb.
 ```
 docker run --name some-mongo -d mongo:tag
 ```
 ... where ```some-mongo``` is the name you want to assign to your container and ```tag``` is the tag specifying the MongoDB version you want.
+
+... or run the ```make``` utility in the project directory.
+```
+make run-mongodb
+```
 
 ### Declare environment variables in .env file
 
@@ -55,6 +61,24 @@ Runs the app.<br>
 
 The app will reload if you make changes to the code.<br>
 
+## Run Docker container with project and MongoDB
+First, make sure that [MongoDB is running](#run-db).
+Then you need to build a server.
+```
+make build-server
+```
+
+In the end, run the docker container with server.
+```
+docker run -P --env APP_PORT=app-port --env DB_URI=db-uri --name server-name --link db-name image-uri/module-name
+```
+... where ```app-port``` is the application port, ```db-uri``` is the database URI, ```server-name``` is the server name and so on.
+
+... or run the following command:
+
+```
+make run-server
+```
 
 ## Build With
 * [Node.js](https://nodejs.org) - is a JavaScript runtime built on Chrome's V8 JavaScript engine.
@@ -65,4 +89,3 @@ The app will reload if you make changes to the code.<br>
 [![License](http://img.shields.io/:license-mit-blue.svg?style=flat-square)](http://badges.mit-license.org)
 
 [MIT license](https://choosealicense.com/licenses/mit/)
-
