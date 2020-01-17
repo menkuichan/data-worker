@@ -19,7 +19,7 @@ run-mongo:
 stop-mongo:
 	@ echo "---> Stopping Docker container with MongoDB ..."
 	@ docker stop $(DB_NAME)
-.PHONY: run-mongo
+.PHONY: stop-mongo
 
 run-service:
 	@ echo "---> Running data-worker Docker container ..."
