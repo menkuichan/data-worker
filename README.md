@@ -16,7 +16,7 @@ Clone this repo to your local machine using `https://github.com/IlonaMenkui/data
 
 ### Run database <a name="run-db"></a>
 
-Run your docker image with MongoDb.
+Run your docker image with MongoDB.
 ```
 docker run --name some-mongo -d mongo:tag
 ```
@@ -24,7 +24,7 @@ docker run --name some-mongo -d mongo:tag
 
 ... or run the ```make``` utility in the project directory.
 ```
-make run-mongodb
+make run-mongo
 ```
 
 ### Declare environment variables in .env file
@@ -64,19 +64,37 @@ The app will reload if you make changes to the code.<br>
 First, make sure that [MongoDB is running](#run-db).
 Then you need to build a docker image.
 ```
-make build-server
+make build-image
 ```
 
 In the end, run the docker container with server.
 ```
-docker run -P --name server-name --link db-name image-uri
+docker run -P -d --rm --env TMDB_API_KEY=YOURSECRETAPIKEY --name service-name --link db-name:db image-uri:image-version
 ```
-... where ```server-name``` is the server name, ```db-name``` is the database name and so on.
+... where ```service-name``` is the server name, ```db-name``` is the database name and so on.
 
 ... or run the following command:
 
 ```
-make run-server
+make run-service
+```
+
+## Stop Docker container with project and MongoDB
+To stop the service use:
+```
+docker stop service-name
+```
+... or:
+```
+make stop-service
+```
+And to stop Docker container with MongoDB use:
+```
+docker stop some-mongo
+```
+... or:
+```
+make stop-mongo
 ```
 
 ## Build With
