@@ -36,6 +36,7 @@ const getGenres = () => (axiosInstance.get(
 const { Schema } = mongoose;
 
 const movieScheme = new Schema({
+  _id: Number,
   title: String,
   overview: String,
   release_date: String,
@@ -49,15 +50,25 @@ const movieScheme = new Schema({
   original_title: String,
   poster_path: String,
   adult: Boolean,
-  id: Number,
   backdrop_path: String,
   video: Boolean,
 });
 
 const genreScheme = new Schema({
-  id: Number,
+  _id: Number,
   name: String,
 });
+
+const renameObjectKey = (
+  oldName,
+  newName,
+  {
+    [oldName]: value,
+    ...others
+  }) => ({
+    [newName]: value,
+    ...others
+  })
 
 const Movie = mongoose.model('Movie', movieScheme);
 
@@ -67,12 +78,13 @@ const populateDB = async () => {
   try {
     let movies = [];
     const promises = [];
-    
-    const { genres } = await getGenres();
 
-    Genre.create(genres, (error) => {
+    const { genres } = await getGenres();
+    const genresWithId = genres.map(genre => renameObjectKey('id', '_id', genre));
+
+    Genre.create(genresWithId, (error) => {
       if (error) console.error(error);
-      console.log('Genres saved successfully!');
+      else console.log('Genres saved successfully!');
     });
 
     const data = await getMovies(1); // eslint-disable-line
@@ -90,9 +102,11 @@ const populateDB = async () => {
 
     movies = [...movies, ...flattenMovies];
 
-    Movie.create(movies, (error) => {
+    moviesWithId = movies.map(movie => renameObjectKey('id', '_id', movie));
+
+    Movie.create(moviesWithId, (error) => {
       if (error) console.error(error);
-      console.log('Movies saved successfully!');
+      else console.log('Movies saved successfully!');
     });
   } catch (error) {
     console.error(error);
