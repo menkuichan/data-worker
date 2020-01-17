@@ -2,7 +2,10 @@ const http = require('http');
 const axios = require('axios');
 const mongoose = require('mongoose');
 const { CronJob } = require('cron');
-require('dotenv').config();
+
+if (process.env.NODE_ENV === 'development') {
+  require('dotenv').config();
+}
 
 const axiosInstance = axios.create({
   baseURL: process.env.TMDB_BASE_URL,
