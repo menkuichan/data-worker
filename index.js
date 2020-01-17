@@ -25,6 +25,14 @@ const getMovies = (page) => (
   })
 );
 
+const getGenres = () => (axiosInstance.get(
+  'genre/movie/list', {
+  params: {
+    api_key: process.env.TMDB_API_KEY
+  },
+})
+);
+
 const { Schema } = mongoose;
 
 const movieScheme = new Schema({
@@ -46,12 +54,26 @@ const movieScheme = new Schema({
   video: Boolean,
 });
 
+const genreScheme = new Schema({
+  id: Number,
+  name: String,
+});
+
 const Movie = mongoose.model('Movie', movieScheme);
+
+const Genre = mongoose.model('Genre', genreScheme);
 
 const populateDB = async () => {
   try {
     let movies = [];
     const promises = [];
+    
+    const { genres } = await getGenres();
+
+    Genre.create(genres, (error) => {
+      if (error) console.error(error);
+      console.log('Genres saved successfully!');
+    });
 
     const data = await getMovies(1); // eslint-disable-line
     movies = [...movies, ...data.results];
@@ -70,7 +92,7 @@ const populateDB = async () => {
 
     Movie.create(movies, (error) => {
       if (error) console.error(error);
-      console.log('Successfully saved!');
+      console.log('Movies saved successfully!');
     });
   } catch (error) {
     console.error(error);
