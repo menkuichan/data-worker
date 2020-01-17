@@ -14,8 +14,7 @@ Download Node.js not lower than version 8.10, [Yarn](https://yarnpkg.com/) , [Do
 
 Clone this repo to your local machine using `https://github.com/IlonaMenkui/data-worker.git`
 
-### Run database
-<a name="run-db"></a>
+### Run database <a name="run-db"></a>
 
 Run your docker image with MongoDb.
 ```
