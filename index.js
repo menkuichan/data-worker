@@ -3,6 +3,8 @@ const axios = require('axios');
 const mongoose = require('mongoose');
 const { CronJob } = require('cron');
 
+const { Movie, Genre } = require('./src/model');
+
 if (process.env.NODE_ENV === 'development') {
   require('dotenv').config();
 }
@@ -25,39 +27,13 @@ const getMovies = (page) => (
   })
 );
 
-const getGenres = () => (axiosInstance.get(
-  'genre/movie/list', {
-  params: {
-    api_key: process.env.TMDB_API_KEY
-  },
-})
+const getGenres = () => (
+  axiosInstance.get('genre/movie/list', {
+    params: {
+      api_key: process.env.TMDB_API_KEY,
+    },
+  })
 );
-
-const { Schema } = mongoose;
-
-const movieScheme = new Schema({
-  _id: Number,
-  title: String,
-  overview: String,
-  release_date: String,
-  genre_ids: [{
-    type: Number,
-  }],
-  vote_average: Number,
-  popularity: Number,
-  original_language: String,
-  vote_count: Number,
-  original_title: String,
-  poster_path: String,
-  adult: Boolean,
-  backdrop_path: String,
-  video: Boolean,
-});
-
-const genreScheme = new Schema({
-  _id: Number,
-  name: String,
-});
 
 const renameObjectKey = (
   oldName,
@@ -65,14 +41,11 @@ const renameObjectKey = (
   {
     [oldName]: value,
     ...others
-  }) => ({
-    [newName]: value,
-    ...others
-  })
-
-const Movie = mongoose.model('Movie', movieScheme);
-
-const Genre = mongoose.model('Genre', genreScheme);
+  },
+) => ({
+  [newName]: value,
+  ...others,
+});
 
 const populateDB = async () => {
   try {
@@ -80,7 +53,7 @@ const populateDB = async () => {
     const promises = [];
 
     const { genres } = await getGenres();
-    const genresWithId = genres.map(genre => renameObjectKey('id', '_id', genre));
+    const genresWithId = genres.map((genre) => renameObjectKey('id', '_id', genre));
 
     Genre.create(genresWithId, (error) => {
       if (error) console.error(error);
@@ -102,7 +75,7 @@ const populateDB = async () => {
 
     movies = [...movies, ...flattenMovies];
 
-    moviesWithId = movies.map(movie => renameObjectKey('id', '_id', movie));
+    const moviesWithId = movies.map((movie) => renameObjectKey('id', '_id', movie));
 
     Movie.create(moviesWithId, (error) => {
       if (error) console.error(error);
