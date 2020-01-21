@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const movieScheme = new Schema({
-  _id: Number,
+  id: Number,
   title: String,
   overview: String,
   release_date: String,
@@ -19,13 +19,16 @@ const movieScheme = new Schema({
   adult: Boolean,
   backdrop_path: String,
   video: Boolean,
-});
+}, { versionKey: false });
 
 const genreScheme = new Schema({
-  _id: Number,
+  id: Number,
   name: String,
-});
+}, { versionKey: false });
 
+movieScheme.pre('save', () => {
+  this.set('_id', mongoose.Types.String(this._id), { strict: false });
+});
 const Movie = mongoose.model('Movie', movieScheme);
 
 const Genre = mongoose.model('Genre', genreScheme);

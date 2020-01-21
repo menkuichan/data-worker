@@ -1,25 +1,29 @@
 const http = require('http');
 const mongoose = require('mongoose');
 const { CronJob } = require('cron');
+const _ = require('lodash');
 
-const { Movie, Genre } = require('./src/model');
+const { Movie, Genre } = require('./src/models');
 const { getMovies, getGenres } = require('./src/api');
 
 if (process.env.NODE_ENV === 'development') {
-  require('dotenv').config();
+  require('dotenv').config(); // eslint-disable-line
 }
 
-const renameObjectKey = (
-  oldName,
-  newName,
-  {
-    [oldName]: value,
-    ...others
-  },
-) => ({
-  [newName]: value,
-  ...others,
-});
+const checkForCreateOrUpdateData = (data, model) => {
+  data.forEach(async (value) => {
+    const res = await model.findOne({ id: value.id }, { _id: 0 });
+    if (!res) {
+      model.create(value, (error) => {
+        if (error) console.error(error);
+      });
+    } else if (!_.isEqual(value, { ...res._doc })) {
+      model.findOneAndUpdate({ id: value.id }, value, (error) => {
+        if (error) console.error(error);
+      });
+    }
+  });
+};
 
 const populateDB = async () => {
   try {
@@ -27,12 +31,8 @@ const populateDB = async () => {
     const promises = [];
 
     const { genres } = await getGenres();
-    const genresWithId = genres.map((genre) => renameObjectKey('id', '_id', genre));
 
-    Genre.create(genresWithId, (error) => {
-      if (error) console.error(error);
-      else console.log('Genres saved successfully!');
-    });
+    checkForCreateOrUpdateData(genres, Genre);
 
     const data = await getMovies(1); // eslint-disable-line
     movies = [...movies, ...data.results];
@@ -41,20 +41,14 @@ const populateDB = async () => {
       promises.push(getMovies(i));
     }
 
-    const res = await Promise.all(promises);
+    const result = await Promise.all(promises);
 
-    const flattenMovies = res
+    const flattenMovies = result
       .map(({ results }) => results)
       .reduce((a, b) => a.concat(b), []);
 
     movies = [...movies, ...flattenMovies];
-
-    const moviesWithId = movies.map((movie) => renameObjectKey('id', '_id', movie));
-
-    Movie.create(moviesWithId, (error) => {
-      if (error) console.error(error);
-      else console.log('Movies saved successfully!');
-    });
+    checkForCreateOrUpdateData(movies, Movie);
   } catch (error) {
     console.error(error);
   }
