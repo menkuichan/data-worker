@@ -26,9 +26,6 @@ const genreScheme = new Schema({
   name: String,
 }, { versionKey: false });
 
-movieScheme.pre('save', () => {
-  this.set('_id', mongoose.Types.String(this._id), { strict: false });
-});
 const Movie = mongoose.model('Movie', movieScheme);
 
 const Genre = mongoose.model('Genre', genreScheme);
