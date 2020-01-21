@@ -1,57 +1,38 @@
 const http = require('http');
-const axios = require('axios');
 const mongoose = require('mongoose');
 const { CronJob } = require('cron');
+const _ = require('lodash');
 
-if (process.env.NODE_ENV === 'development') {
-  require('dotenv').config();
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config(); // eslint-disable-line
 }
 
-const axiosInstance = axios.create({
-  baseURL: process.env.TMDB_BASE_URL,
-});
+const { Movie, Genre } = require('./src/models');
+const { getMovies, getGenres } = require('./src/api');
 
-axiosInstance.interceptors.response.use(
-  (response) => response.data,
-  (error) => Promise.reject(error),
-);
-
-const getMovies = (page) => (
-  axiosInstance.get('/discover/movie', {
-    params: {
-      api_key: process.env.TMDB_API_KEY,
-      page,
-    },
-  })
-);
-
-const { Schema } = mongoose;
-
-const movieScheme = new Schema({
-  title: String,
-  overview: String,
-  release_date: String,
-  genre_ids: [{
-    type: Number,
-  }],
-  vote_average: Number,
-  popularity: Number,
-  original_language: String,
-  vote_count: Number,
-  original_title: String,
-  poster_path: String,
-  adult: Boolean,
-  id: Number,
-  backdrop_path: String,
-  video: Boolean,
-});
-
-const Movie = mongoose.model('Movie', movieScheme);
+const createOrUpdateItem = (data, model) => {
+  data.forEach(async (value) => {
+    const res = await model.findOne({ id: value.id }, { _id: 0 });
+    if (!res) {
+      model.create(value, (error) => {
+        if (error) console.error(error);
+      });
+    } else if (!_.isEqual(value, { ...res._doc })) {
+      model.findOneAndUpdate({ id: value.id }, value, (error) => {
+        if (error) console.error(error);
+      });
+    }
+  });
+};
 
 const populateDB = async () => {
   try {
     let movies = [];
     const promises = [];
+
+    const { genres } = await getGenres();
+
+    createOrUpdateItem(genres, Genre);
 
     const data = await getMovies(1); // eslint-disable-line
     movies = [...movies, ...data.results];
@@ -60,18 +41,15 @@ const populateDB = async () => {
       promises.push(getMovies(i));
     }
 
-    const res = await Promise.all(promises);
+    const result = await Promise.all(promises);
 
-    const flattenMovies = res
+    const flattenMovies = result
       .map(({ results }) => results)
       .reduce((a, b) => a.concat(b), []);
 
     movies = [...movies, ...flattenMovies];
 
-    Movie.create(movies, (error) => {
-      if (error) console.error(error);
-      console.log('Successfully saved!');
-    });
+    createOrUpdateItem(movies, Movie);
   } catch (error) {
     console.error(error);
   }
