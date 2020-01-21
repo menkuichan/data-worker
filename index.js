@@ -3,14 +3,14 @@ const mongoose = require('mongoose');
 const { CronJob } = require('cron');
 const _ = require('lodash');
 
-const { Movie, Genre } = require('./src/models');
-const { getMovies, getGenres } = require('./src/api');
-
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config(); // eslint-disable-line
 }
 
-const checkForCreateOrUpdateData = (data, model) => {
+const { Movie, Genre } = require('./src/models');
+const { getMovies, getGenres } = require('./src/api');
+
+const createOrUpdateItem = (data, model) => {
   data.forEach(async (value) => {
     const res = await model.findOne({ id: value.id }, { _id: 0 });
     if (!res) {
@@ -32,7 +32,7 @@ const populateDB = async () => {
 
     const { genres } = await getGenres();
 
-    checkForCreateOrUpdateData(genres, Genre);
+    createOrUpdateItem(genres, Genre);
 
     const data = await getMovies(1); // eslint-disable-line
     movies = [...movies, ...data.results];
@@ -48,7 +48,8 @@ const populateDB = async () => {
       .reduce((a, b) => a.concat(b), []);
 
     movies = [...movies, ...flattenMovies];
-    checkForCreateOrUpdateData(movies, Movie);
+
+    createOrUpdateItem(movies, Movie);
   } catch (error) {
     console.error(error);
   }

@@ -1,9 +1,5 @@
 const axios = require('axios');
 
-if (process.env.NODE_ENV === 'development') {
-  require('dotenv').config();
-}
-
 const axiosInstance = axios.create({
   baseURL: process.env.TMDB_BASE_URL,
 });
