@@ -7,6 +7,11 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config(); // eslint-disable-line
 }
 
+const debug = require('debug');
+
+const debugError = debug('app:error');
+const debugInfo = debug('app:info');
+
 const { Movie, Genre } = require('./src/models');
 const { getMovies, getGenres } = require('./src/api');
 
@@ -15,11 +20,11 @@ const createOrUpdateItem = (data, model) => {
     const res = await model.findOne({ id: value.id }, { _id: 0 });
     if (!res) {
       model.create(value, (error) => {
-        if (error) console.error(error);
+        if (error) debugError(error);
       });
     } else if (!_.isEqual(value, { ...res._doc })) {
       model.findOneAndUpdate({ id: value.id }, value, (error) => {
-        if (error) console.error(error);
+        if (error) debugError(error);
       });
     }
   });
@@ -51,7 +56,7 @@ const populateDB = async () => {
 
     createOrUpdateItem(movies, Movie);
   } catch (error) {
-    console.error(error);
+    debugError(error);
   }
 };
 
@@ -60,7 +65,7 @@ mongoose.connect(process.env.DB_URI, { useNewUrlParser: true, useUnifiedTopology
 const db = mongoose.connection;
 
 db.on('error', (error) => {
-  console.error(error);
+  debugError(error);
 });
 
 const job = new CronJob('0 0 12 * * * *', () => populateDB(), null, true, 'Europe/Minsk', null, true);
@@ -72,5 +77,6 @@ db.once('open', () => {
 const server = http.createServer();
 
 server.listen(process.env.APP_PORT, () => {
-  console.log(`Server running at port: ${process.env.APP_PORT}`);
+  debug('listening');
+  debugInfo(`Server running at port: ${process.env.APP_PORT}`);
 });
