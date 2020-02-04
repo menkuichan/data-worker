@@ -8,7 +8,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-Download Node.js not lower than version 8.10, [Yarn](https://yarnpkg.com/) , [Docker](https://www.docker.com/) and [MongoDB Docker image](https://hub.docker.com/_/mongo).
+Download Node.js not lower than version 8.10, [Yarn](https://yarnpkg.com/), [Docker](https://www.docker.com/) and [MongoDB Docker image](https://hub.docker.com/_/mongo).
 
 ### Clone
 
