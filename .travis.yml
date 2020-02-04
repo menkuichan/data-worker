@@ -6,9 +6,6 @@ node_js:
 services:
   - docker
 
-env:
-  - APP_PORT=3000 DB_URI=mongodb://localhost:27017/super-enigma-db
-
 script:
   - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
   - make build-image image-publish IMAGE_VERSION=$TRAVIS_BRANCH
@@ -17,4 +14,4 @@ branches:
   only:
     - develop
     - tags
-    - featare/build-docker-image-on-travis-ci 1edd754
+    - feature/build-docker-image-on-travis-ci
