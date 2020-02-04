@@ -14,4 +14,3 @@ branches:
   only:
     - develop
     - tags
-    - feature/build-docker-image-on-travis-ci
