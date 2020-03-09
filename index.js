@@ -1,7 +1,7 @@
 const http = require('http');
 const mongoose = require('mongoose');
 const { CronJob } = require('cron');
-const _ = require('lodash');
+const isEqual = require('lodash.isequal');
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config(); // eslint-disable-line
@@ -22,7 +22,7 @@ const createOrUpdateItem = (data, model) => {
       model.create(value, (error) => {
         if (error) debugError(error);
       });
-    } else if (!_.isEqual(value, { ...res._doc })) {
+    } else if (!isEqual(value, { ...res._doc })) {
       model.findOneAndUpdate({ id: value.id }, value, (error) => {
         if (error) debugError(error);
       });
