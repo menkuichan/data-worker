@@ -10,7 +10,7 @@
     "start": "NODE_ENV=development nodemon index.js"
   },
   "dependencies": {
-    "axios": "^0.19.1",
+    "axios": "^0.21.1",
     "cron": "^1.7.2",
     "debug": "^4.1.1",
     "dotenv": "^8.2.0",
