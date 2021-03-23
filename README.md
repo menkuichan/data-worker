@@ -12,7 +12,7 @@ Download Node.js not lower than version 8.10, [Yarn](https://yarnpkg.com/), [Doc
 
 ### Clone
 
-Clone this repo to your local machine using `https://github.com/IlonaMenkui/data-worker.git`
+Clone this repo to your local machine using `https://github.com/menkuichan/data-worker.git`
 
 ### Run database <a name="run-db"></a>
 
